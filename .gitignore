@@ -1,0 +1,11 @@
+# Node (Frontend)
+**/node_modules/
+**/build/
+.env
+
+# Java (Backend)
+**/target/
+**/*.class
+.mvn/
+.idea/
+.vscode/
