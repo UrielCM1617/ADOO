@@ -9,13 +9,14 @@ function Reservar() {
 
   const [asientos, setAsientos] = useState([]);
   const [asientoSeleccionado, setAsientoSeleccionado] = useState("");
-  const [tipoClase, setTipoClase] = useState("TURISTA"); // Estado para la clase
+  const [tipoClase, setTipoClase] = useState("TURISTA");
   const [precioFinal, setPrecioFinal] = useState(state?.precioBase || 0);
 
   useEffect(() => {
     if (locationState) {
       localStorage.setItem('vueloRespaldo', JSON.stringify(locationState));
     }
+
     if (state?.idVuelo) {
       axios.get(`http://localhost:8080/api/asientos/vuelo/${state.idVuelo}`)
         .then(res => setAsientos(res.data))
@@ -23,18 +24,25 @@ function Reservar() {
     }
   }, [locationState, state?.idVuelo]);
 
-  // Actualizar precio si cambia la clase
   useEffect(() => {
+    if (!state) return;
+
     if (tipoClase === "VIP") {
-      setPrecioFinal(state.precioBase + 500); // Cargo extra por VIP
+      setPrecioFinal(state.precioBase + 500);
     } else {
       setPrecioFinal(state.precioBase);
     }
-  }, [tipoClase, state.precioBase]);
+  }, [tipoClase, state]);
 
   const handlePagar = async () => {
-    const idUsuarioLogueado = localStorage.getItem('usuarioId'); 
-    
+    const idUsuarioLogueado = localStorage.getItem('usuarioId');
+
+    if (!idUsuarioLogueado) {
+      alert("Debes iniciar sesión antes de reservar.");
+      navigate('/login');
+      return;
+    }
+
     if (!asientoSeleccionado) {
       alert("Por favor, selecciona un asiento.");
       return;
@@ -43,9 +51,9 @@ function Reservar() {
     const payload = {
       usuario: { idUsuario: parseInt(idUsuarioLogueado) },
       vuelo: { idVuelo: state.idVuelo },
-      asiento: { idAsiento: parseInt(asientoSeleccionado) }, 
+      asiento: { idAsiento: parseInt(asientoSeleccionado) },
       precioTotal: precioFinal,
-      tipoClase: tipoClase, // <--- Enviamos el tipo de clase
+      tipoClase: tipoClase,
       estatus: "PAGADO"
     };
 
@@ -59,22 +67,59 @@ function Reservar() {
     }
   };
 
+  if (!state) {
+    return (
+      <div className="empty-state">
+        <div className="panel-card">
+          <h2>No hay vuelo seleccionado</h2>
+          <p>Primero busca un vuelo desde la pantalla principal.</p>
+          <button className="btn btn-primary" onClick={() => navigate('/')}>
+            Ir al inicio
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ padding: '40px', textAlign: 'center' }}>
-      <div style={confirmCardStyle}>
-        <h2 style={{ color: '#B31010' }}>Configura tu Viaje</h2>
-        <div style={{ textAlign: 'left', margin: '20px 0' }}>
-          <p><strong>Vuelo:</strong> {state.origen?.nombre} ➡️ {state.destino?.nombre}</p>
-          
-          <label><strong>Tipo de Clase:</strong></label>
-          <select style={selectStyle} onChange={(e) => setTipoClase(e.target.value)} value={tipoClase}>
-            <option value="TURISTA">Turista (Precio Base)</option>
+    <div className="reserve-page">
+      <div className="reserve-card">
+        <div className="reserve-header">
+          <span className="reserve-badge">Configuración del viaje</span>
+          <h2>Reserva tu vuelo</h2>
+          <p>Selecciona tu clase y asiento antes de confirmar la compra.</p>
+        </div>
+
+        <div className="reserve-summary">
+          <div className="summary-item">
+            <span className="summary-label">Ruta</span>
+            <span className="summary-value">
+              {state.origen?.nombre} ➜ {state.destino?.nombre}
+            </span>
+          </div>
+
+          <div className="summary-item">
+            <span className="summary-label">Precio base</span>
+            <span className="summary-value">${state.precioBase}</span>
+          </div>
+        </div>
+
+        <div className="field-group">
+          <label>Tipo de clase</label>
+          <select
+            className="input-control"
+            onChange={(e) => setTipoClase(e.target.value)}
+            value={tipoClase}
+          >
+            <option value="TURISTA">Turista (Precio base)</option>
             <option value="VIP">VIP (+ $500.00)</option>
           </select>
+        </div>
 
-          <label style={{ display: 'block', marginTop: '15px' }}><strong>Selecciona tu Asiento:</strong></label>
-          <select 
-            style={selectStyle} 
+        <div className="field-group">
+          <label>Selecciona tu asiento</label>
+          <select
+            className="input-control"
             onChange={(e) => setAsientoSeleccionado(e.target.value)}
             value={asientoSeleccionado}
           >
@@ -85,19 +130,19 @@ function Reservar() {
               </option>
             ))}
           </select>
-          
-          <p style={{ fontSize: '1.4rem', color: '#28a745', marginTop: '20px', textAlign: 'center' }}>
-            <strong>Total a Pagar: ${precioFinal}</strong>
-          </p>
         </div>
-        <button onClick={handlePagar} style={btnConfirmarStyle}>Confirmar y Reservar</button>
+
+        <div className="price-box">
+          <span>Total a pagar</span>
+          <strong>${precioFinal}</strong>
+        </div>
+
+        <button onClick={handlePagar} className="btn btn-success full-width">
+          Confirmar y reservar
+        </button>
       </div>
     </div>
   );
 }
-
-const selectStyle = { width: '100%', padding: '10px', marginTop: '5px', borderRadius: '5px', border: '1px solid #ccc' };
-const confirmCardStyle = { backgroundColor: '#fff', padding: '30px', borderRadius: '12px', border: '1px solid #ddd', display: 'inline-block', minWidth: '400px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' };
-const btnConfirmarStyle = { width: '100%', backgroundColor: '#28a745', color: 'white', padding: '15px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem' };
 
 export default Reservar;

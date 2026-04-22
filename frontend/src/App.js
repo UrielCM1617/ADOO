@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Registro from './pages/Registro';
 import Login from './pages/Login';
 import Reservar from './pages/Reservar';
-import Home from './pages/Home'; // Importamos el componente desde su archivo
-import axios from 'axios';
+import Home from './pages/Home';
+import logoVuelos from './assets/Logo.png';
 
 function App() {
   const [nombreUsuario, setNombreUsuario] = useState(null);
@@ -17,47 +17,53 @@ function App() {
   const cerrarSesion = () => {
     localStorage.removeItem('usuarioNombre');
     localStorage.removeItem('usuarioId');
+    localStorage.removeItem('vueloRespaldo');
     setNombreUsuario(null);
     window.location.href = "/";
   };
 
   return (
     <Router>
-      <div style={{ fontFamily: 'Arial, sans-serif', minHeight: '100vh', backgroundColor: '#f4f4f4' }}>
-        <nav style={navStyle}>
-          <Link to="/" style={logoStyle}>UAM Vuelos</Link>
-          <div>
+      <div className="app-shell">
+        <nav className="navbar">
+          <div className="navbar-left">
+            <Link to="/" className="brand">
+              <img src={logoVuelos} alt="Logo Sistema de Vuelos" className="brand-logo" />
+              <div>
+                <div className="brand-title">Patlani-vuelos </div>
+                <div className="brand-subtitle">Inspiración prehispánica • interfaz moderna</div>
+              </div>
+            </Link>
+          </div>
+
+          <div className="navbar-right">
             {nombreUsuario ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <span style={{ fontWeight: 'bold' }}>Hola, {nombreUsuario}</span>
-                <button onClick={cerrarSesion} style={btnCerrarStyle}>Cerrar Sesión</button>
+              <div className="user-box">
+                <span className="welcome-text">Hola, {nombreUsuario}</span>
+                <button onClick={cerrarSesion} className="btn btn-outline">
+                  Cerrar sesión
+                </button>
               </div>
             ) : (
-              <>
-                <Link to="/login" style={linkStyle}>Iniciar Sesión</Link>
-                <Link to="/registro" style={linkStyle}>Registrarse</Link>
-              </>
+              <div className="nav-links">
+                <Link to="/login" className="nav-link">Iniciar sesión</Link>
+                <Link to="/registro" className="btn btn-primary">Registrarse</Link>
+              </div>
             )}
           </div>
         </nav>
 
-        <div style={{ padding: '20px' }}>
+        <main className="page-wrapper">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/registro" element={<Registro />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reservar" element={<Reservar />} />
           </Routes>
-        </div>
+        </main>
       </div>
     </Router>
   );
 }
-
-// Estilos globales del Navbar
-const navStyle = { display: 'flex', justifyContent: 'space-between', padding: '15px 50px', backgroundColor: '#fff', borderBottom: '3px solid #B31010' };
-const logoStyle = { fontSize: '1.5rem', fontWeight: 'bold', color: '#333', textDecoration: 'none' };
-const linkStyle = { marginLeft: '20px', textDecoration: 'none', color: '#333', fontWeight: 'bold' };
-const btnCerrarStyle = { padding: '5px 10px', cursor: 'pointer', border: '1px solid #ccc', background: 'none', borderRadius: '4px' };
 
 export default App;

@@ -9,18 +9,17 @@ function Login() {
 
   const manejarLogin = async (e) => {
     e.preventDefault();
+
     try {
       const respuesta = await usuarioService.loginUsuario(email, password);
-      
+
       if (respuesta.status === 200) {
         alert(`Bienvenido de nuevo, ${respuesta.data.nombre}`);
-        
-        // GUARDAR DATOS EN LOCALSTORAGE
+
         localStorage.setItem('usuarioNombre', respuesta.data.nombre);
-        // Guardamos el ID del usuario para las reservas (ajusta idUsuario según tu modelo backend)
-        localStorage.setItem('usuarioId', respuesta.data.idUsuario || respuesta.data.id); 
-        
-        navigate('/'); 
+        localStorage.setItem('usuarioId', respuesta.data.idUsuario || respuesta.data.id);
+
+        navigate('/');
       }
     } catch (error) {
       console.error("Error en login:", error);
@@ -29,39 +28,42 @@ function Login() {
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <h2 style={{ color: '#B31010', textAlign: 'center' }}>Inicio de Sesión UAM</h2>
+    <div className="auth-container">
+      <div className="auth-card frame-login">
+        <div className="auth-top-mark">✦</div>
+        <h2>Iniciar sesión</h2>
+        <p className="auth-subtitle">Accede a tu cuenta para administrar tus reservaciones.</p>
+
         <form onSubmit={manejarLogin}>
-          <div style={inputGroup}>
-            <label>Correo electrónico:</label>
-            <input 
-              type="email" 
-              style={inputStyle} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
+          <div className="field-group">
+            <label>Correo electrónico</label>
+            <input
+              type="email"
+              className="input-control"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
-          <div style={inputGroup}>
-            <label>Contraseña:</label>
-            <input 
-              type="password" 
-              style={inputStyle} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
+
+          <div className="field-group">
+            <label>Contraseña</label>
+            <input
+              type="password"
+              className="input-control"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
-          <button type="submit" style={btnStyle}>Entrar</button>
+
+          <button type="submit" className="btn btn-primary full-width">
+            Entrar
+          </button>
         </form>
       </div>
     </div>
   );
 }
-
-const containerStyle = { display: 'flex', justifyContent: 'center', marginTop: '50px' };
-const cardStyle = { border: '2px solid #333', padding: '30px', borderRadius: '8px', width: '300px', backgroundColor: '#fff' };
-const inputGroup = { marginBottom: '15px', textAlign: 'left' };
-const inputStyle = { width: '100%', padding: '8px', marginTop: '5px', boxSizing: 'border-box' };
-const btnStyle = { width: '100%', padding: '10px', backgroundColor: '#333', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' };
 
 export default Login;
